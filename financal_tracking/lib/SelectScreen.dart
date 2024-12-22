@@ -1,5 +1,6 @@
 import 'package:financal_tracking/main.dart';
 import 'package:flutter/material.dart';
+import 'package:financal_tracking/HomeScreen.dart';
 
 class SelectScreen extends StatefulWidget {
   @override
@@ -129,7 +130,7 @@ class _SelectScreenState extends State<SelectScreen> {
                       SizedBox(height: 10),
                       DropdownButtonFormField<String>(
                         decoration: InputDecoration(
-                          hintText: 'Ay gününü seçin',
+                          hintText: 'Please Select Your Day',
                           hintStyle: TextStyle(color: Colors.white),
                           enabledBorder: UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.white),
@@ -151,7 +152,7 @@ class _SelectScreenState extends State<SelectScreen> {
                         },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Lütfen bir gün seçin';
+                            return 'Please Select Your Day';
                           }
                           return null;
                         },
@@ -162,22 +163,27 @@ class _SelectScreenState extends State<SelectScreen> {
                       // Continue Button
                       ElevatedButton(
                         onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            // Geçerli değerler ile devam et
-                            print('Aylık gelir: ${_incomeController.text}');
-                            print('Aylık döngü: $_selectedCycle');
-                            // TODO: Bir sonraki sayfaya geç veya işlemleri yap
+                          // Kullanıcı maaş bilgisi girmemişse uyarı veriyoruz
+                          if (_incomeController.text.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Please enter your income."),
+                              ),
+                            );
+                            return;
                           }
+
+                          // Maaş bilgisini alıp HomeScreen'e yönlendirme
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => HomeScreen(
+                                monthlyIncome: _incomeController.text,
+                              ),
+                            ),
+                          );
                         },
-                        child: Text('Continue'),
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: Color(0xFF4524FF),
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 50, vertical: 15),
-                          textStyle: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
+                        child: const Text("Continue"),
                       ),
                     ],
                   ),
