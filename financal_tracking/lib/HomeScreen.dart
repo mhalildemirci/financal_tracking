@@ -1,8 +1,23 @@
+import 'package:financal_tracking/CategorySelectionScreen.dart';
 import 'package:flutter/material.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   final String monthlyIncome; // Kullanıcıdan alınan maaş bilgisi
   const HomeScreen({Key? key, required this.monthlyIncome}) : super(key: key);
+
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final List<Map<String, dynamic>> _spendings = [];
+  late double remainingBalance;
+
+  @override
+  void initState() {
+    super.initState();
+    remainingBalance = double.parse(widget.monthlyIncome.replaceAll(' \$', ''));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +58,7 @@ class HomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      "You Wallet",
+                      "Your Wallet",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 24,
@@ -52,7 +67,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      "$monthlyIncome",
+                      "${remainingBalance.toStringAsFixed(2)} \$",
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 36,
@@ -70,20 +85,6 @@ class HomeScreen extends StatelessWidget {
                           },
                           icon: const Icon(Icons.edit, color: Colors.white),
                         ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          onPressed: () {
-                            // StatisticsScreen'e geçiş
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const StatisticsScreen()),
-                            );
-                          },
-                          icon:
-                              const Icon(Icons.bar_chart, color: Colors.white),
-                        ),
                       ],
                     ),
                   ],
@@ -91,65 +92,56 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          // Harcama bilgisi ve ekleme düğmeleri
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextButton.icon(
-                  onPressed: () {
-                    // Harcama bilgisi görme aksiyonu
-                  },
-                  icon: const Icon(Icons.info_outline, color: Colors.black),
-                  label: const Text(
-                    "You spend information",
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
-                TextButton.icon(
-                  onPressed: () {
-                    // Harcama ekleme ekranına geçiş
-                  },
-                  icon:
-                      const Icon(Icons.add_circle_outline, color: Colors.black),
-                  label: const Text(
-                    "Add spend info",
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
-              ],
+          const SizedBox(height: 16),
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+              "Your Spendings",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-          // Gelecekte harcama listesi buraya eklenecek
-          const SizedBox(height: 16),
           Expanded(
-            child: Center(
-              child: Text(
-                "No spending records yet!",
-                style: TextStyle(
-                  color: Colors.grey[400],
-                  fontSize: 16,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: _spendings.length,
+              itemBuilder: (context, index) {
+                final spending = _spendings[index];
+                return Card(
+                    child: ListTile(
+                  leading: Icon(spending['icon'] as IconData),
+                  title: Text(spending['category'] as String),
+                  subtitle: Text(
+                    "${spending['amount']} \$",
+                    style: TextStyle(
+                      color: Colors.red,
+                    ),
+                  ),
+                ));
+              },
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-// Dummy StatisticsScreen widget
-class StatisticsScreen extends StatelessWidget {
-  const StatisticsScreen({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Statistics Screen")),
-      body: const Center(child: Text("This is the Statistics Screen")),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const CategorySelectionScreen(),
+            ),
+          );
+          if (result != null) {
+            setState(() {
+              _spendings.add(result);
+              remainingBalance -= result['amount'] as double;
+            });
+          }
+        },
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }

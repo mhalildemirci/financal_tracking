@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
+import 'AmountInputScreen.dart'; // Doğru yolu yazdığınızdan emin olun
 
 class CategorySelectionScreen extends StatelessWidget {
-  final Function(String) onCategorySelected;
-
-  const CategorySelectionScreen({Key? key, required this.onCategorySelected})
-      : super(key: key);
+  const CategorySelectionScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +35,20 @@ class CategorySelectionScreen extends StatelessWidget {
           final category = categories[index];
           return GestureDetector(
             onTap: () {
-              onCategorySelected(category['label'] as String);
+              // Seçilen kategori ile AmountInputScreen'e yönlendir
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AmountInputScreen(
+                    category: category['label'] as String,
+                  ),
+                ),
+              ).then((result) {
+                if (result != null) {
+                  // Burada HomeScreen'e bilgi aktarma kodu olacak
+                  Navigator.pop(context, result);
+                }
+              });
             },
             child: Container(
               decoration: BoxDecoration(
